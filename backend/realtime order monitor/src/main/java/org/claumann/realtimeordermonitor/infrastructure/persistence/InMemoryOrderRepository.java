@@ -8,7 +8,6 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
 @Component
 public class InMemoryOrderRepository implements OrderRepository {
@@ -16,13 +15,13 @@ public class InMemoryOrderRepository implements OrderRepository {
     private final Map<String, OrderEntity> orderRepository = new HashMap<>();
 
     {
-        final String firstOrderId = UUID.randomUUID().toString();
+        final String firstOrderId = "c3fe75bf-a5ff-4026-a261-097112fead43";
         orderRepository.put(firstOrderId, new OrderEntity(firstOrderId, OrderStatus.RECEIVED, LocalDateTime.now()));
 
-        final String secondOrderId = UUID.randomUUID().toString();
+        final String secondOrderId = "d397135e-70ff-4d17-a003-8e8aa17ef12b";
         orderRepository.put(secondOrderId, new OrderEntity(secondOrderId, OrderStatus.READY, LocalDateTime.now()));
 
-        final String thirdOrderId = UUID.randomUUID().toString();
+        final String thirdOrderId = "f8afdb91-7496-457a-95b6-a5a07d4976a3";
         orderRepository.put(thirdOrderId, new OrderEntity(thirdOrderId, OrderStatus.IN_TRANSIT, LocalDateTime.now()));
     }
 
