@@ -35,7 +35,12 @@ public class Order {
 
             }
             case IN_TRANSIT -> {
-                throw new RuntimeException("IN_TRANSIT is final");
+                if (newStatus != OrderStatus.DELIVERED)
+                    throw new RuntimeException("IN_TRANSIT can only go to DELIVERED");
+
+            }
+            case DELIVERED -> {
+                throw new RuntimeException("DELIVERED is final");
             }
         }
 
