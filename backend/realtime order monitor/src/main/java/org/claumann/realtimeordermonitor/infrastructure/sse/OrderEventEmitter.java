@@ -28,14 +28,9 @@ public class OrderEventEmitter {
         emitter.onTimeout(cleanup);
         emitter.onError(ex -> cleanup.run());
 
-        // Verifica se o pedido já foi adicionado ao mapa
-        // Adiciona um novo emitter a lista de emitters do pedido
-        // Se nao existir pedido registrado no mapa de emitters, cria uma lista e registra o pedido no mapa
-        if (emitters.containsKey(orderId)) {
-            emitters.get(orderId).add(emitter);
-        } else {
-            emitters.put(orderId, new CopyOnWriteArrayList<>(List.of(emitter)));
-        }
+        // Se a chave não existe, cria a lista e retorna ela. Se já existe, retorna a lista existente.
+        // Em ambos os casos você chama .add(emitter) no resultado.
+        emitters.computeIfAbsent(orderId, k -> new CopyOnWriteArrayList<>()).add(emitter);
 
         return emitter;
     }
