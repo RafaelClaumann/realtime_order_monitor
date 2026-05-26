@@ -20,11 +20,11 @@ public class OrderEventEmitter {
 
     public void publish(final String orderId, final OrderStatus status) {
         final SseEmitter emitter = emitters.get(orderId);
+        if (emitter == null) return;
+
         try {
             emitter.send(status.name());
         } catch (IOException e) {
-            throw new RuntimeException(e);
-        } finally {
             emitters.remove(orderId);
         }
     }
