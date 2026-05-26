@@ -14,10 +14,11 @@ public class UpdateOrderStatusUsecase {
         this.repository = repository;
     }
 
-    public void execute(final String orderId, final OrderStatus newStatus) {
+    public Order execute(final String orderId, final OrderStatus newStatus) {
         final Order order = repository.fetchOrderById(orderId);
         order.updateStatus(newStatus);
         repository.saveOrder(order);
+        return order;
     }
 
 }
