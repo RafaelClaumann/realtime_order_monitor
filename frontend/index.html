@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<body>
+    <div id="c3fe75bf-a5ff-4026-a261-097112fead43">
+        <b>Pedido 1</b>
+        <p>aguardando...</p>
+    </div>
+
+    <div id="d397135e-70ff-4d17-a003-8e8aa17ef12b">
+        <b>Pedido 2</b>
+        <p>aguardando...</p>
+    </div>
+
+    <div id="f8afdb91-7496-457a-95b6-a5a07d4976a3">
+        <b>Pedido 3</b>
+        <p>aguardando...</p>
+    </div>
+
+    <script>
+        const orders = [
+            'c3fe75bf-a5ff-4026-a261-097112fead43',
+            'd397135e-70ff-4d17-a003-8e8aa17ef12b',
+            'f8afdb91-7496-457a-95b6-a5a07d4976a3'
+        ];
+
+        orders.forEach(id => {
+            const eventSource = new EventSource(`http://localhost:8080/orders/${id}/events`);
+
+            eventSource.onmessage = (event) => {
+                document.querySelector(`#${CSS.escape(id)} p`).innerText = event.data;
+            };
+        });
+    </script>
+</body>
+</html>
