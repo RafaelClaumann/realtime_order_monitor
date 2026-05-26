@@ -15,6 +15,12 @@ public class OrderEventEmitter {
     public SseEmitter register(final String orderId) {
         final SseEmitter emitter = new SseEmitter(Long.MAX_VALUE);
         emitters.put(orderId, emitter);
+
+        Runnable cleanup = () -> emitters.remove(orderId);
+        emitter.onCompletion(cleanup);
+        emitter.onTimeout(cleanup);
+        emitter.onError((e) -> cleanup.run());
+
         return emitter;
     }
 
@@ -31,8 +37,9 @@ public class OrderEventEmitter {
 
     public void complete(final String orderId) {
         final SseEmitter emitter = emitters.get(orderId);
-        emitter.complete();
-        emitters.remove(orderId);
+        if (emitter != null) {
+            emitter.complete();
+        }
     }
 
 }
