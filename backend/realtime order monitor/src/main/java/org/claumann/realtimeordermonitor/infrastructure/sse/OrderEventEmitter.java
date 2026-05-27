@@ -1,5 +1,6 @@
 package org.claumann.realtimeordermonitor.infrastructure.sse;
 
+import lombok.extern.slf4j.Slf4j;
 import org.claumann.realtimeordermonitor.domain.model.Order;
 import org.claumann.realtimeordermonitor.infrastructure.sse.dto.out.OrderStatusResponse;
 import org.springframework.http.MediaType;
@@ -12,6 +13,7 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+@Slf4j
 @Component
 public class OrderEventEmitter {
 
@@ -24,7 +26,10 @@ public class OrderEventEmitter {
         // Registra callbacks para remover o emitter recém criado quando estiver completado
         final Runnable cleanup = () -> {
             final List<SseEmitter> list = emitters.get(order.getId());
-            if (list != null) list.remove(emitter);
+            if (list != null) {
+                log.info("SSE subscriber removed — orderId: {}, totalSubscribers: {}", order.getId(), list.size());
+                list.remove(emitter);
+            }
         };
 
         emitter.onCompletion(cleanup);
@@ -35,6 +40,9 @@ public class OrderEventEmitter {
         // Em ambos os casos você chama .add(emitter) no resultado.
         emitters.computeIfAbsent(order.getId(), k -> new CopyOnWriteArrayList<>()).add(emitter);
         publish(order);
+
+        log.info("SSE subscriber registered — orderId: {}, totalSubscribers: {}", order.getId(), emitters.get(order.getId()).size());
+
         return emitter;
     }
 
@@ -62,11 +70,12 @@ public class OrderEventEmitter {
 
     @Scheduled(fixedDelay = 10000)
     public void heartbeat() {
-        emitters.forEachValue(Long.MAX_VALUE, list -> {
+        emitters.forEach(Long.MAX_VALUE, (orderId, list) -> {
             list.forEach(emitter -> {
                 try {
                     emitter.send(SseEmitter.event().comment("heartbeat"));
                 } catch (IOException e) {
+                    log.warn("SSE zombie emitter detected and removed — orderId: {}", orderId);
                     list.remove(emitter);
                 }
             });
