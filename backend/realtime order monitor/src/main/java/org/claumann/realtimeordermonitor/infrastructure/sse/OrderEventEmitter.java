@@ -1,6 +1,8 @@
 package org.claumann.realtimeordermonitor.infrastructure.sse;
 
 import org.claumann.realtimeordermonitor.domain.model.Order;
+import org.claumann.realtimeordermonitor.infrastructure.sse.dto.out.OrderStatusResponse;
+import org.springframework.http.MediaType;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
@@ -40,9 +42,11 @@ public class OrderEventEmitter {
         final List<SseEmitter> sseEmitters = emitters.get(order.getId());
         if (sseEmitters == null || sseEmitters.isEmpty()) return;
 
+        final OrderStatusResponse payload = OrderStatusResponse.fromDomain(order);
+
         sseEmitters.forEach(emitter -> {
             try {
-                emitter.send(order.getStatus().name());
+                emitter.send(payload, MediaType.APPLICATION_JSON);
             } catch (IOException e) {
                 sseEmitters.remove(emitter);
             }
