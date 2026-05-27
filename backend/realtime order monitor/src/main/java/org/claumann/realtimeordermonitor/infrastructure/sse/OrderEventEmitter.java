@@ -1,6 +1,7 @@
 package org.claumann.realtimeordermonitor.infrastructure.sse;
 
 import org.claumann.realtimeordermonitor.domain.model.Order;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
@@ -53,6 +54,19 @@ public class OrderEventEmitter {
         if (!sseEmitters.isEmpty()) {
             sseEmitters.forEach(SseEmitter::complete);
         }
+    }
+
+    @Scheduled(fixedDelay = 10000)
+    public void heartbeat() {
+        emitters.forEachValue(Long.MAX_VALUE, list -> {
+            list.forEach(emitter -> {
+                try {
+                    emitter.send(SseEmitter.event().comment("heartbeat"));
+                } catch (IOException e) {
+                    list.remove(emitter);
+                }
+            });
+        });
     }
 
 }
