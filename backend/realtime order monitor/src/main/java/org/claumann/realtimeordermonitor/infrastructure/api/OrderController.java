@@ -40,8 +40,8 @@ public class OrderController {
 
     @PatchMapping("{id}")
     public ResponseEntity<Void> patchOrderStatus(@PathVariable final String id, @RequestBody UpdateOrderStatusRequest requestBody) {
-        updateOrderStatusUsecase.execute(id, requestBody.status());
-        eventEmitter.publish(id, requestBody.status());
+        final Order order = updateOrderStatusUsecase.execute(id, requestBody.status());
+        eventEmitter.publish(order);
 
         if (OrderStatus.DELIVERED == requestBody.status())
             eventEmitter.complete(id);
@@ -52,7 +52,8 @@ public class OrderController {
     @CrossOrigin(origins = "*")
     @GetMapping("{id}/events")
     public SseEmitter fetchOrderEvents(@PathVariable final String id) {
-        return eventEmitter.register(id);
+        final Order order = getOrderUsecase.execute(id);
+        return eventEmitter.register(order);
     }
 
 }
